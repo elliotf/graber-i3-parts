@@ -31,7 +31,7 @@ idler_shaft_x = (base_width/2-idler_outer_diam)*left;
 idler_shaft_z = belt_pulley_diam/2-idler_outer_diam/2;
 idler_shoulder = 1;
 
-belt_opening_depth  = idler_thickness*2 + idler_shoulder*1;
+belt_opening_depth  = idler_thickness*2 + idler_shoulder*2;
 belt_opening_height = x_rod_spacing - bearing_inner_diam - min_material_thickness*2;
 
 motor_mount_width = motor_side;
