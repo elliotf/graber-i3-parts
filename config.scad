@@ -14,13 +14,15 @@ rotation         = 180/resolution; // if possible, have faces line up with cubes
 
 min_material_thickness = extrusion_width*4;
 
-wall_thickness   = 2;
-nut_diam         = 5.65; // 5.5 + clearance
-nut_thickness    = 2;
+m3_diam          = 3.1;
+m3_nut_diam      = 5.65;
 
-motor_side         = 43; // nema17
-motor_hole_spacing = 31;
-motor_screw_diam   = 3;
+// NEMA17
+motor_side          = 43;
+motor_length        = 43;
+motor_hole_spacing  = 31;
+motor_hole_diam     = 3.1;
+motor_shoulder_diam = 25;
 
 // LM6UU
 bearing_inner_diam = 6;
@@ -45,7 +47,8 @@ idler_thickness    = 4;
 belt_width         = 2;
 belt_thickness     = 6;
 belt_pitch         = 2;
-belt_pulley_circ   = belt_pitch*16;
+belt_pulley_circ   = belt_pitch*16; // 16T GT2
+belt_pulley_circ   = belt_pitch*20; // 20T GT2
 belt_pulley_diam   = belt_pulley_circ / approximate_pi;
 
 x_rod_spacing      = 45;

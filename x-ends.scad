@@ -11,7 +11,7 @@ leadscrew_diam          = 5;
 leadscrew_nut_diam      = 8.2;
 leadscrew_nut_thickness = 3;
 
-bearing_retainer_diam   = bearing_outer_diam + min_material_thickness*4;
+bearing_retainer_diam   = bearing_outer_diam + min_material_thickness*3;
 bearing_dist_from_x_rod = bearing_inner_diam/2+min_material_thickness+bearing_outer_diam/2;
 bearing_pos_x           = base_width/2-bearing_retainer_diam/2;
 bearing_pos_y           = bearing_dist_from_x_rod*front;
@@ -34,7 +34,10 @@ idler_shoulder = 1;
 belt_opening_depth  = idler_thickness*2 + idler_shoulder*1;
 belt_opening_height = x_rod_spacing - bearing_inner_diam - min_material_thickness*2;
 
-echo("BASE_HEIGHT - LEADSCREW_RETAINER_HEIGHT: ", base_height - leadscrew_retainer_height);
+motor_mount_width = motor_side;
+
+z_rod_to_endstop_dist = 16;
+endstop_from_motor_side_dist = z_rod_to_endstop_dist - bearing_retainer_diam/2 - 0.5;
 
 module zip_tie_hole(fit_around_diam) {
   rotate([0,0,rotation]) {
@@ -259,7 +262,6 @@ module x_end_idler() {
   module body() {
     x_end_base();
 
-    //# for(side=[front,rear]) {
     for(side=[front,rear]) {
       hull() {
         translate([idler_shaft_x,(idler_thickness+idler_shoulder/2)*side,idler_shaft_z]) {
@@ -298,12 +300,126 @@ module x_end_idler() {
   }
 }
 
-translate([base_width*.6*right,0,0]) {
-  x_end_idler();
+module x_motor_mount() {
+  z_adjustment_block_width  = endstop_from_motor_side_dist*2;
+  z_adjustment_block_height = base_depth-m3_nut_diam/2;
+
+  module body() {
+    for(side=[top,bottom]) {
+      hull() {
+        translate([0,0,x_rod_spacing/2*side]) {
+          rotate([0,90,0]) {
+            rotate([0,0,rotation]) {
+              hole(base_depth,motor_mount_width,resolution);
+              % cylinder(r=bearing_inner_diam/2,h=200,center=true,$fn=32);
+            }
+          }
+        }
+
+        translate([0,0,(motor_shoulder_diam/2+1)*side]) {
+          cube([motor_mount_width,base_depth,5],center=true);
+        }
+      }
+    }
+
+    hull() {
+      translate([motor_side/2-z_adjustment_block_width/2,0,(x_rod_spacing/2+base_depth/2-z_adjustment_block_height/2)*bottom]) {
+        translate([0,bearing_dist_from_x_rod*front,0]) {
+          cube([z_adjustment_block_width,base_depth,z_adjustment_block_height],center=true);
+        }
+
+        cube([z_adjustment_block_width,.1,z_adjustment_block_height],center=true);
+      }
+    }
+  }
+
+  module holes() {
+    for(side=[top,bottom]) {
+      // x rod holes
+      translate([0,0,x_rod_spacing/2*side]) {
+        rotate([0,90,0]) {
+          rotate([0,0,rotation]) {
+            hole(bearing_inner_diam,motor_mount_width*2,resolution);
+          }
+        }
+
+        // expansion joint
+        translate([extrusion_height*2*left,0,0]) {
+          rotate([45*side,0,0]) {
+            translate([0,bearing_outer_diam/2,0]) {
+              cube([motor_mount_width,bearing_outer_diam,2],center=true);
+            }
+          }
+        }
+
+        // flange to avoid delamination in case of first layer squashedness
+        translate([motor_mount_width/2+1,0,0]) {
+          rotate([0,90,0]) {
+            hull() {
+              hole(bearing_inner_diam,2+extrusion_height*4,resolution);
+              hole(bearing_inner_diam+1,2,resolution);
+            }
+          }
+        }
+      }
+
+
+      // motor mount holes
+      for(end=[left,right]) {
+        translate([motor_hole_spacing/2*side,0,motor_hole_spacing/2*end]) {
+          rotate([90,0,0]) {
+            rotate([0,0,22.5]) {
+              hole(motor_hole_diam,motor_mount_width+1,8);
+            }
+          }
+        }
+      }
+    }
+
+    // motor shoulder
+    rotate([90,0,0]) {
+      rotate([0,0,rotation]) {
+        hole(motor_shoulder_diam,base_depth+1,resolution);
+      }
+    }
+
+    // z adjustment screw, captive nut
+    translate([motor_side/2-endstop_from_motor_side_dist,bearing_dist_from_x_rod*front,0]) {
+      rotate([0,0,90]) {
+        hole(m3_diam,200,6);
+      }
+      translate([0,0,(x_rod_spacing/2+base_depth/2)*bottom]) {
+        rotate([0,0,90]) {
+          hole(m3_nut_diam,6,6);
+        }
+      }
+    }
+  }
+
+  % translate([0,base_depth/2+motor_length/2,0]) {
+    cube([motor_side,motor_length,motor_side],center=true);
+  }
+
+  % translate([0,0,0]) {
+    rotate([90,0,0]) {
+      hole(belt_pulley_diam+2,belt_opening_depth,resolution);
+    }
+  }
+
+  difference() {
+    body();
+    holes();
+  }
 }
 
-translate([base_width*.6*left,0,0]) {
+x_motor_mount();
+
+translate([(motor_mount_width/2+base_width/2+0.5)*right,0,0]) {
   mirror([1,0,0]) {
-    x_end_base();
+    x_end_idler();
   }
+}
+
+translate([base_width*2.4*right,0,0]) {
+  x_end_idler();
 }
