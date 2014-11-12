@@ -18,7 +18,9 @@ wall_thickness   = 2;
 nut_diam         = 5.65; // 5.5 + clearance
 nut_thickness    = 2;
 
-motor_side       = 43; // nema17
+motor_side         = 43; // nema17
+motor_hole_spacing = 31;
+motor_screw_diam   = 3;
 
 // LM6UU
 bearing_inner_diam = 6;
@@ -46,3 +48,4 @@ belt_pitch         = 2;
 belt_pulley_circ   = belt_pitch*16;
 belt_pulley_diam   = belt_pulley_circ / approximate_pi;
 
+x_rod_spacing      = 45;

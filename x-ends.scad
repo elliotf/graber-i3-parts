@@ -1,15 +1,11 @@
 include <config.scad>;
 use <util.scad>;
 
-x_rod_spacing           = 45;
 smooth_threaded_spacing = 17;
 
 base_depth  = bearing_inner_diam + min_material_thickness*2;
 base_width  = motor_side/2 + smooth_threaded_spacing + bearing_outer_diam/2;
 base_height = x_rod_spacing + base_depth;
-
-belt_opening_depth  = idler_thickness*2 + 2;
-belt_opening_height = x_rod_spacing - bearing_inner_diam - min_material_thickness*2;
 
 leadscrew_diam          = 5;
 leadscrew_nut_diam      = 8.2;
@@ -30,6 +26,13 @@ leadscrew_retainer_pos_z  = base_height/2-leadscrew_retainer_height/2;
 
 zip_tie_hole_width     = 4;
 zip_tie_hole_thickness = 3;
+
+idler_shaft_x = (base_width/2-idler_outer_diam)*left;
+idler_shaft_z = belt_pulley_diam/2-idler_outer_diam/2;
+idler_shoulder = 1;
+
+belt_opening_depth  = idler_thickness*2 + idler_shoulder*2;
+belt_opening_height = x_rod_spacing - bearing_inner_diam - min_material_thickness*2;
 
 echo("BASE_HEIGHT - LEADSCREW_RETAINER_HEIGHT: ", base_height - leadscrew_retainer_height);
 
@@ -189,17 +192,10 @@ module x_end_base() {
       for(side=[top,bottom]) {
         translate([0,0,(belt_opening_height/2-belt_opening_depth/2)*side]) {
           rotate([0,90,0]) {
-            hole(belt_opening_depth,100,resolution);
+            rotate([0,0,rotation]) {
+              hole(belt_opening_depth,100,resolution);
+            }
           }
-        }
-      }
-    }
-
-    // idler screw shaft
-    translate([(base_width/2-idler_outer_diam)*left,0,belt_pulley_diam/2-idler_outer_diam/2]) {
-      rotate([90,0,0]) {
-        rotate([0,0,22.5]) {
-          hole(idler_inner_diam,base_depth+1,8);
         }
       }
     }
@@ -259,5 +255,56 @@ module plate() {
   }
 }
 
-//plate();
-x_end_base();
+module x_end_idler() {
+  module body() {
+    x_end_base();
+
+    //# for(side=[front,rear]) {
+    for(side=[front,rear]) {
+      hull() {
+        translate([idler_shaft_x,(belt_opening_depth/2-idler_shoulder/2)*side,idler_shaft_z]) {
+          rotate([90,0,0]) {
+            rotate([0,0,22.5]) {
+              hole(idler_inner_diam+2,idler_shoulder,8);
+            }
+          }
+        }
+
+        translate([idler_shaft_x,(belt_opening_depth/2+0.1)*side,idler_shaft_z]) {
+          rotate([90,0,0]) {
+            rotate([0,0,22.5]) {
+              hole(idler_inner_diam+4,0.2,8);
+            }
+          }
+        }
+      }
+    }
+  }
+
+  module holes() {
+    // idler screw shaft
+    translate([idler_shaft_x,0,idler_shaft_z]) {
+      rotate([90,0,0]) {
+        rotate([0,0,22.5]) {
+          hole(idler_inner_diam,base_depth+1,8);
+        }
+      }
+    }
+  }
+
+  difference() {
+    body();
+    holes();
+  }
+}
+
+x_end_idler();
+translate([base_width*right,0,0]) {
+  //x_end_idler();
+}
+
+translate([base_width*left,0,0]) {
+  mirror([1,0,0]) {
+    //x_end_base();
+  }
+}
