@@ -31,7 +31,7 @@ idler_shaft_x = (base_width/2-idler_outer_diam)*left;
 idler_shaft_z = belt_pulley_diam/2-idler_outer_diam/2;
 idler_shoulder = 1;
 
-belt_opening_depth  = idler_thickness*2 + idler_shoulder*2;
+belt_opening_depth  = idler_thickness*2 + idler_shoulder*1;
 belt_opening_height = x_rod_spacing - bearing_inner_diam - min_material_thickness*2;
 
 echo("BASE_HEIGHT - LEADSCREW_RETAINER_HEIGHT: ", base_height - leadscrew_retainer_height);
@@ -262,18 +262,18 @@ module x_end_idler() {
     //# for(side=[front,rear]) {
     for(side=[front,rear]) {
       hull() {
-        translate([idler_shaft_x,(belt_opening_depth/2-idler_shoulder/2)*side,idler_shaft_z]) {
+        translate([idler_shaft_x,(idler_thickness+idler_shoulder/2)*side,idler_shaft_z]) {
           rotate([90,0,0]) {
             rotate([0,0,22.5]) {
-              hole(idler_inner_diam+2,idler_shoulder,8);
+              hole(idler_inner_diam+1.5,idler_shoulder,8);
             }
           }
-        }
 
-        translate([idler_shaft_x,(belt_opening_depth/2+0.1)*side,idler_shaft_z]) {
-          rotate([90,0,0]) {
-            rotate([0,0,22.5]) {
-              hole(idler_inner_diam+4,0.2,8);
+          translate([0,(idler_shoulder/2+0.1)*side,0]) {
+            rotate([90,0,0]) {
+              rotate([0,0,22.5]) {
+                hole(idler_inner_diam+4,0.2,8);
+              }
             }
           }
         }
@@ -298,13 +298,12 @@ module x_end_idler() {
   }
 }
 
-x_end_idler();
-translate([base_width*right,0,0]) {
-  //x_end_idler();
+translate([base_width*.6*right,0,0]) {
+  x_end_idler();
 }
 
-translate([base_width*left,0,0]) {
+translate([base_width*.6*left,0,0]) {
   mirror([1,0,0]) {
-    //x_end_base();
+    x_end_base();
   }
 }
