@@ -33,6 +33,9 @@ idler_shoulder = 1;
 
 belt_opening_depth  = idler_thickness*2 + idler_shoulder*2;
 belt_opening_height = x_rod_spacing - bearing_inner_diam - min_material_thickness*2;
+base_side_wall_thickness = (base_depth - belt_opening_depth)/2;
+
+echo("WALL THICKNESS: ", base_side_wall_thickness);
 
 motor_mount_width = motor_side;
 
@@ -264,18 +267,16 @@ module x_end_idler() {
 
     for(side=[front,rear]) {
       hull() {
-        translate([idler_shaft_x,(idler_thickness+idler_shoulder/2)*side,idler_shaft_z]) {
+        translate([idler_shaft_x,(base_depth/2-base_side_wall_thickness/2)*side,idler_shaft_z]) {
           rotate([90,0,0]) {
             rotate([0,0,22.5]) {
-              hole(idler_inner_diam+1.5,idler_shoulder,8);
+              hole(idler_inner_diam+1.5,base_side_wall_thickness+idler_shoulder*2,8);
             }
           }
 
-          translate([0,(idler_shoulder/2+0.1)*side,0]) {
+          translate([0,0,0]) {
             rotate([90,0,0]) {
-              rotate([0,0,22.5]) {
-                hole(idler_inner_diam+4,0.2,8);
-              }
+              hole(idler_inner_diam+4,base_side_wall_thickness,16);
             }
           }
         }
@@ -288,9 +289,15 @@ module x_end_idler() {
     translate([idler_shaft_x,0,idler_shaft_z]) {
       rotate([90,0,0]) {
         rotate([0,0,22.5]) {
-          hole(idler_inner_diam,base_depth+1,8);
+          hole(idler_inner_diam,base_depth*2,8);
         }
       }
+    }
+  }
+
+  % translate([idler_shaft_x,0,idler_shaft_z]) {
+    rotate([90,0,0]) {
+      hole(idler_outer_diam,idler_thickness*2,resolution);
     }
   }
 
