@@ -9,7 +9,7 @@ approximate_pi   = 3.14159265359;
 
 extrusion_height = 0.3;
 extrusion_width  = 0.5;
-resolution       = 36;
+resolution       = 64;
 rotation         = 180/resolution; // if possible, have faces line up with cubes
 
 min_material_thickness = extrusion_width*4;
@@ -37,12 +37,12 @@ bearing_length     = 24;
 // MR105
 idler_outer_diam   = 10;
 idler_inner_diam   = 5;
-idler_thickness    = 4;
+idler_thickness    = 4*2;
 
 // 623
 idler_outer_diam   = 10;
 idler_inner_diam   = 3;
-idler_thickness    = 4;
+idler_thickness    = 4*2;
 
 belt_width         = 2;
 belt_thickness     = 6;
