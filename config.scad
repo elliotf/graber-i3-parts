@@ -16,6 +16,7 @@ min_material_thickness = extrusion_width*4;
 
 m3_diam          = 3.1;
 m3_nut_diam      = 5.6;
+m3_nut_thickness = 3;
 
 // NEMA17
 motor_side          = 43;

@@ -39,9 +39,18 @@ belt_area_body_depth  = idler_opening_depth + min_material_thickness*2;
 belt_opening_height   = x_rod_spacing - bearing_inner_diam - min_material_thickness*2;
 base_side_wall_thickness = (belt_area_body_depth - idler_opening_depth)/2;
 
+clamp_area_width  = m3_nut_diam + min_material_thickness*3;
+clamp_area_depth  = m3_nut_diam + min_material_thickness*2.5;
+clamp_area_height = 18;
+
+clamp_area_pos_x  = base_width/2-clamp_area_width/2;
+clamp_area_pos_y  = belt_area_body_depth/2+clamp_area_depth/2-min_material_thickness;
+clamp_area_pos_z  = base_height/2-clamp_area_height/2;
+
 echo("WALL THICKNESS: ", base_side_wall_thickness);
 echo("HEIGHT: ", base_height);
 echo("BEARING LENGTH: ", bearing_length);
+echo("CLAMP AREA HEIGHT: ", clamp_area_height);
 
 motor_mount_width = motor_side;
 
@@ -79,6 +88,37 @@ module x_end_base() {
       }
     }
 
+    // clamp area
+    for(end=[left]) {
+      for(side=[top,bottom]) {
+        hull() {
+          translate([end*clamp_area_pos_x,0,0]) {
+            translate([0,0,(x_rod_spacing/2)*side]) {
+              rotate([0,90,0]) {
+                rotate([0,0,rotation]) {
+                  hole(base_depth,clamp_area_width,resolution);
+                }
+              }
+            }
+
+            translate([0,clamp_area_pos_y-clamp_area_depth/4,clamp_area_pos_z*side]) {
+              cube([clamp_area_width,clamp_area_depth/2,clamp_area_height],center=true);
+            }
+
+            for(corner=[top,bottom]) {
+              translate([0,clamp_area_pos_y+clamp_area_depth/2-m3_diam/2,clamp_area_pos_z*side+((clamp_area_height/2-m3_diam/2)*corner)]) {
+                rotate([0,90,0]) {
+                  rotate([0,0,rotation]) {
+                    hole(m3_diam,clamp_area_width,resolution);
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+
     // z bearing retainer
     hull() {
       for (side=[top,bottom]) {
@@ -96,26 +136,6 @@ module x_end_base() {
         }
       }
     }
-
-    // z bearing retainer
-    /*
-    hull() {
-      translate([bearing_pos_x+bearing_retainer_diam/4,front*bearing_dist_from_x_rod/2,0]) {
-        cube([bearing_retainer_diam/2,bearing_dist_from_x_rod,base_height],center=true);
-      }
-      translate([bearing_pos_x+bearing_retainer_diam/4,front*(bearing_dist_from_x_rod+bearing_retainer_diam/2-base_depth/2),0]) {
-        for(side=[top,bottom]) {
-          translate([0,0,(x_rod_spacing/2)*side]) {
-            rotate([0,90,0]) {
-              rotate([0,0,rotation]) {
-                hole(base_depth,bearing_retainer_diam/2,resolution);
-              }
-            }
-          }
-        }
-      }
-    }
-    */
 
     leadscrew_retainer_edge_to_edge = leadscrew_retainer_diam*1.125;
     // z leadscrew nut retainer
@@ -151,6 +171,22 @@ module x_end_base() {
       }
     }
 
+    for(end=[left]) {
+      for(side=[top,bottom]) {
+        translate([clamp_area_pos_x*end,clamp_area_pos_y,clamp_area_pos_z*side]) {
+          rotate([0,0,22.5]) {
+            hole(m3_diam,base_height,8);
+          }
+
+          translate([0,0,clamp_area_height/2*-side]) {
+            rotate([0,0,90]) {
+              hole(m3_nut_diam,m3_nut_thickness*2,6);
+            }
+          }
+        }
+      }
+    }
+
     // bevel to avoid delamination in case of first layer squashedness
     for(end=[left,right]) {
       for(side=[top,bottom]) {
@@ -171,7 +207,7 @@ module x_end_base() {
     idler_opening_difference = idler_opening_depth - belt_opening_depth;
     hull() {
       for(side=[top,bottom]) {
-        translate([base_width/2*left,0,(belt_opening_height/2-idler_opening_depth/2+belt_opening_depth*.2)*side]) {
+        translate([base_width/2*left,0,(belt_opening_height/2-idler_opening_depth/2+belt_opening_depth*.275)*side]) {
           scale([1,1,.5]) {
             rotate([0,90,0]) {
               rotate([0,0,rotation]) {
@@ -187,7 +223,7 @@ module x_end_base() {
     // belt opening
     hull() {
       for(side=[top,bottom]) {
-        translate([base_width/2*right,0,(belt_opening_height/2-idler_opening_depth/2+belt_opening_depth*.2)*side]) {
+        translate([base_width/2*right,0,(belt_opening_height/2-idler_opening_depth/2+belt_opening_depth*.275)*side]) {
           scale([1,1,.5]) {
             rotate([0,90,0]) {
               rotate([0,0,rotation]) {
@@ -209,7 +245,7 @@ module x_end_base() {
 
     // bearing zip ties
     for (side=[top,bottom]) {
-      translate([bearing_pos_x,bearing_pos_y,(belt_opening_height/2-belt_opening_depth/2-zip_tie_hole_width*.4)*side]) {
+      translate([bearing_pos_x,bearing_pos_y,(belt_opening_height/2-belt_opening_depth/2-zip_tie_hole_width*.15)*side]) {
         zip_tie_hole(bearing_retainer_diam-zip_tie_hole_thickness*.8);
       }
     }
@@ -233,6 +269,7 @@ module x_end_base() {
           cube([base_width-extrusion_height*2,bearing_inner_diam*2,2],center=true);
         }
 
+        /*
         for (x=[-base_width/2+bearing_inner_diam*.75,-base_width*.15]) {
           translate([x,0,0]) {
             rotate([0,90,0]) {
@@ -240,6 +277,7 @@ module x_end_base() {
             }
           }
         }
+        */
       }
     }
 
@@ -279,13 +317,13 @@ module x_end_idler() {
         translate([idler_shaft_x,(belt_area_body_depth/2-base_side_wall_thickness/2)*side,idler_shaft_z]) {
           rotate([90,0,0]) {
             rotate([0,0,22.5]) {
-              hole(idler_inner_diam+1.5,base_side_wall_thickness+idler_shoulder*2,8);
+              hole(idler_inner_diam+2,base_side_wall_thickness+idler_shoulder*2,16);
             }
           }
 
           translate([0,0,0]) {
             rotate([90,0,0]) {
-              hole(idler_inner_diam+4,base_side_wall_thickness,16);
+              hole(idler_inner_diam+5,base_side_wall_thickness,32);
             }
           }
         }
