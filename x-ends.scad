@@ -16,13 +16,14 @@ bearing_dist_from_x_rod = bearing_inner_diam/2+min_material_thickness/2+bearing_
 bearing_pos_x           = base_width/2-bearing_retainer_diam/2;
 bearing_pos_y           = bearing_dist_from_x_rod*front;
 
-smooth_rod_hole_diam    = bearing_inner_diam + 1;
-
 leadscrew_retainer_diam   = leadscrew_nut_diam+6;
-leadscrew_retainer_height = leadscrew_nut_thickness*2;
+leadscrew_retainer_height = leadscrew_nut_thickness*4;
 leadscrew_retainer_pos_x  = bearing_pos_x+(left*smooth_threaded_spacing);
 leadscrew_retainer_pos_y  = bearing_pos_y;
 leadscrew_retainer_pos_z  = base_height/2-leadscrew_retainer_height/2;
+leadscrew_retainer_pos_z  = x_rod_spacing/2-bearing_inner_diam/2-leadscrew_retainer_height/2;
+leadscrew_retainer_pos_z  = leadscrew_retainer_height/2 + 4;
+leadscrew_retainer_pos_z  = 0;
 
 zip_tie_hole_width     = 4;
 zip_tie_hole_thickness = 3;
@@ -35,10 +36,12 @@ idler_shoulder = 1;
 idler_opening_depth   = idler_thickness + idler_shoulder*2;
 belt_opening_depth    = idler_opening_depth - min_material_thickness;
 belt_area_body_depth  = idler_opening_depth + min_material_thickness*2;
-belt_opening_height = x_rod_spacing - bearing_inner_diam - min_material_thickness*2;
+belt_opening_height   = x_rod_spacing - bearing_inner_diam - min_material_thickness*2;
 base_side_wall_thickness = (belt_area_body_depth - idler_opening_depth)/2;
 
 echo("WALL THICKNESS: ", base_side_wall_thickness);
+echo("HEIGHT: ", base_height);
+echo("BEARING LENGTH: ", bearing_length);
 
 motor_mount_width = motor_side;
 
@@ -79,7 +82,7 @@ module x_end_base() {
     // z bearing retainer
     hull() {
       for (side=[top,bottom]) {
-        translate([leadscrew_retainer_pos_x+leadscrew_nut_diam/2,0,x_rod_spacing/2*side]) {
+        translate([leadscrew_retainer_pos_x+leadscrew_nut_diam/2,0,(x_rod_spacing/2)*side]) {
           rotate([0,90,0]) {
             rotate([0,0,rotation]) {
               hole(base_depth,leadscrew_nut_diam,resolution);
@@ -93,15 +96,15 @@ module x_end_base() {
         }
       }
     }
+
+    // z bearing retainer
     hull() {
-      translate([bearing_pos_x+bearing_retainer_diam/4,0,0]) {
-        translate([0,front*bearing_dist_from_x_rod/2,0]) {
-          cube([bearing_retainer_diam/2,bearing_dist_from_x_rod,base_height],center=true);
-        }
+      translate([bearing_pos_x+bearing_retainer_diam/4,front*bearing_dist_from_x_rod/2,0]) {
+        cube([bearing_retainer_diam/2,bearing_dist_from_x_rod,base_height],center=true);
       }
       translate([bearing_pos_x+bearing_retainer_diam/4,front*(bearing_dist_from_x_rod+bearing_retainer_diam/2-base_depth/2),0]) {
         for(side=[top,bottom]) {
-          translate([0,0,x_rod_spacing/2*side]) {
+          translate([0,0,(x_rod_spacing/2)*side]) {
             rotate([0,90,0]) {
               rotate([0,0,rotation]) {
                 hole(base_depth,bearing_retainer_diam/2,resolution);
@@ -116,14 +119,22 @@ module x_end_base() {
     // z leadscrew nut retainer
     translate([0,0,leadscrew_retainer_pos_z]) {
       hull() {
-        for(side=[left,right]) {
-          translate([(base_width/2-1)*side,-base_depth/4,0]) {
-            cube([2,base_depth/2,leadscrew_retainer_height],center=true);
+        translate([-base_width/2+base_side_wall_thickness,-belt_area_body_depth/2+base_side_wall_thickness/2,0]) {
+          //# cube([base_width,base_side_wall_thickness,1],center=true);
+          cube([base_side_wall_thickness*2,base_side_wall_thickness,leadscrew_retainer_height],center=true);
+          /*
+          rotate([90,0,0]) {
+            rotate([0,0,rotation]) {
+              hole(base_side_wall_thickness*2,base_side_wall_thickness,resolution);
+            }
           }
+          */
+        }
+        translate([base_width/2-bearing_retainer_diam/4,bearing_pos_y,0]) {
+          cube([bearing_retainer_diam/2,bearing_retainer_diam,leadscrew_retainer_height],center=true);
         }
         translate([leadscrew_retainer_pos_x,leadscrew_retainer_pos_y,0]) {
           rotate([0,0,90]) {
-            //hole(leadscrew_retainer_diam,leadscrew_retainer_height,6);
             cylinder(r=leadscrew_retainer_diam/2,h=leadscrew_retainer_height,$fn=resolution,center=true);
           }
         }
@@ -142,64 +153,19 @@ module x_end_base() {
         }
       }
     }
-    // flange to avoid delamination in case of first layer squashedness
-    for(side=[top,bottom]) {
-      translate([base_width/2+1,0,x_rod_spacing/2*side]) {
-        rotate([0,90,0]) {
-          hull() {
-            hole(bearing_inner_diam,2+extrusion_height*4,resolution);
-            hole(bearing_inner_diam+1,2,resolution);
+
+    // bevel to avoid delamination in case of first layer squashedness
+    for(end=[left,right]) {
+      for(side=[top,bottom]) {
+        translate([(base_width/2+1)*end,0,x_rod_spacing/2*side]) {
+          rotate([0,90,0]) {
+            rotate([0,0,180/16]) {
+              hull() {
+                hole(bearing_inner_diam,2+extrusion_height*4,16);
+                hole(bearing_inner_diam+1,2,16);
+              }
+            }
           }
-        }
-      }
-    }
-
-    // bearing zip ties
-    for (side=[top,bottom]) {
-      translate([bearing_pos_x,bearing_pos_y,side*(belt_opening_height/2-idler_opening_depth/2-zip_tie_hole_width/2)]) {
-        //zip_tie_hole(bearing_retainer_diam-zip_tie_hole_thickness*.8);
-      }
-    }
-
-    // bearing retainer
-    translate([bearing_pos_x,bearing_pos_y,0]) {
-      // cavity for bearing
-      translate([0,0,leadscrew_retainer_pos_z-leadscrew_retainer_height/2-base_height/2]) {
-        rotate([0,0,-45]) {
-          translate([bearing_outer_diam/4*left,bearing_retainer_diam/2*front,0]) {
-            cube([bearing_outer_diam/2,bearing_retainer_diam,base_height],center=true);
-          }
-        }
-        rotate([0,0,rotation]) {
-          hole(bearing_outer_diam,base_height,resolution);
-        }
-      }
-
-      // clearance for smooth rod allowing for support of leadscrew nut
-      hull() {
-        translate([smooth_rod_hole_diam/4*left,bearing_retainer_diam/2*front,0]) {
-          cube([smooth_rod_hole_diam/2,bearing_retainer_diam,base_height*2],center=true);
-        }
-        rotate([0,0,-45]) {
-          translate([smooth_rod_hole_diam/4*left,bearing_retainer_diam/2*front,0]) {
-            cube([smooth_rod_hole_diam/2,bearing_retainer_diam,base_height*2],center=true);
-          }
-        }
-      }
-      rotate([0,0,rotation]) {
-        hole(smooth_rod_hole_diam,base_height*2,resolution);
-      }
-    }
-
-    // leadscrew shaft and captive nut
-    translate([leadscrew_retainer_pos_x,leadscrew_retainer_pos_y,0]) {
-      rotate([0,0,90]) {
-      //rotate([0,0,22.5]) {
-        hole(leadscrew_diam+1,base_height*2,6);
-      }
-      translate([0,0,leadscrew_retainer_pos_z-leadscrew_retainer_height/2]) {
-        rotate([0,0,90]) {
-          hole(leadscrew_nut_diam,leadscrew_nut_thickness*2,6);
         }
       }
     }
@@ -209,24 +175,66 @@ module x_end_base() {
     hull() {
       for(side=[top,bottom]) {
         translate([base_width/2*left,0,(belt_opening_height/2-idler_opening_depth/2)*side]) {
-          rotate([0,90,0]) {
-            rotate([0,0,rotation]) {
-              hole(idler_opening_depth,base_width,resolution);
-              hole(belt_opening_depth,base_width+idler_opening_difference*2,resolution);
+          scale([1,1,.5]) {
+            rotate([0,90,0]) {
+              rotate([0,0,rotation]) {
+                hole(idler_opening_depth,base_width,resolution);
+                hole(belt_opening_depth,base_width+idler_opening_difference*2,resolution);
+              }
             }
           }
         }
       }
     }
+
     // belt opening
     hull() {
       for(side=[top,bottom]) {
         translate([base_width/2*right,0,(belt_opening_height/2-idler_opening_depth/2)*side]) {
-          rotate([0,90,0]) {
-            rotate([0,0,rotation]) {
-              hole(belt_opening_depth,base_width+1,resolution);
+          scale([1,1,.5]) {
+            rotate([0,90,0]) {
+              rotate([0,0,rotation]) {
+                hole(belt_opening_depth,base_width+1,resolution);
+              }
             }
           }
+        }
+      }
+    }
+
+    // bearing retainer
+    translate([bearing_pos_x,bearing_pos_y,0]) {
+      // cavity for bearing
+      hull () {
+        rotate([0,0,45]) {
+          translate([-bearing_outer_diam/4,bearing_outer_diam/4,0]) {
+            rotate([0,0,22.5]) {
+              hole(bearing_outer_diam/2,base_height+1,8);
+            }
+          }
+        }
+        rotate([0,0,rotation]) {
+          hole(bearing_outer_diam,base_height+1,resolution);
+        }
+      }
+    }
+
+    // bearing zip ties
+    for (side=[top,bottom]) {
+      translate([bearing_pos_x,bearing_pos_y,(x_rod_spacing/2-bearing_inner_diam/2-zip_tie_hole_width/2)*side]) {
+      //translate([bearing_pos_x,bearing_pos_y,(belt_opening_height/2-belt_opening_depth)*side]) {
+        zip_tie_hole(bearing_retainer_diam-zip_tie_hole_thickness*.8);
+      }
+    }
+
+    // leadscrew shaft and captive nut
+    translate([leadscrew_retainer_pos_x,leadscrew_retainer_pos_y,0]) {
+      rotate([0,0,90]) {
+        hole(leadscrew_diam+1,base_height*2,6);
+      }
+      translate([0,0,leadscrew_retainer_pos_z-leadscrew_retainer_height/2]) {
+        rotate([0,0,90]) {
+          hole(leadscrew_nut_diam,leadscrew_retainer_height,6);
         }
       }
     }
@@ -234,11 +242,11 @@ module x_end_base() {
     // clamp area
     for (side=[top,bottom]) {
       translate([0,0,x_rod_spacing/2*side]) {
-        translate([extrusion_height*2*left,bearing_inner_diam,0]) {
-          cube([base_width,bearing_inner_diam*2,2],center=true);
+        translate([0,bearing_inner_diam,0]) {
+          cube([base_width-extrusion_height*2,bearing_inner_diam*2,2],center=true);
         }
 
-        for (x=[-base_width/2+bearing_inner_diam*.75,bearing_pos_x-bearing_outer_diam/2-1]) {
+        for (x=[-base_width/2+bearing_inner_diam*.75,-base_width*.15]) {
           translate([x,0,0]) {
             rotate([0,90,0]) {
               zip_tie_hole(base_depth);
@@ -248,25 +256,6 @@ module x_end_base() {
       }
     }
   }
-
-  /*
-  % translate([0,bearing_pos_y,0]) {
-    translate([bearing_pos_x,0,0]) {
-      cylinder(r=bearing_inner_diam/2,h=100,center=true,$fn=24);
-    }
-    translate([leadscrew_retainer_pos_x,0,0]) {
-      cylinder(r=leadscrew_diam/2,h=100,center=true,$fn=24);
-
-      translate([0,0,-base_height/2-10-motor_side/2]) {
-        cube([motor_side,motor_side,motor_side],center=true);
-      }
-
-      translate([0,motor_side/2+7+3,0]) {
-        cube([60,6,60],center=true);
-      }
-    }
-  }
-  */
 
   difference() {
     body();
@@ -314,7 +303,13 @@ module x_end_idler() {
     translate([idler_shaft_x,0,idler_shaft_z]) {
       rotate([90,0,0]) {
         rotate([0,0,22.5]) {
-          hole(idler_inner_diam,base_depth*2,8);
+          hole(idler_inner_diam,base_depth*4,8);
+        }
+
+        translate([0,0,belt_area_body_depth/2+base_depth/2]) {
+          rotate([0,0,90]) {
+            hole(m3_nut_diam,base_depth,6);
+          }
         }
       }
     }
@@ -454,5 +449,10 @@ translate([(motor_mount_width/2+base_width/2+0.5)*right,0,0]) {
 
 translate([base_width*2.4*right,0,0]) {
   //x_end_idler();
+}
+translate([(base_width+10)*left,0,0]) {
+  mirror([1,0,0]) {
+    //x_end_base();
+  }
 }
 x_end_idler();

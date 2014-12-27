@@ -15,7 +15,7 @@ rotation         = 180/resolution; // if possible, have faces line up with cubes
 min_material_thickness = extrusion_width*4;
 
 m3_diam          = 3.1;
-m3_nut_diam      = 5.65;
+m3_nut_diam      = 5.6;
 
 // NEMA17
 motor_side          = 43;
