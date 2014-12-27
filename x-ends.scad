@@ -119,16 +119,8 @@ module x_end_base() {
     // z leadscrew nut retainer
     translate([0,0,leadscrew_retainer_pos_z]) {
       hull() {
-        translate([-base_width/2+base_side_wall_thickness,-belt_area_body_depth/2+base_side_wall_thickness/2,0]) {
-          //# cube([base_width,base_side_wall_thickness,1],center=true);
+        translate([-base_width/2+base_side_wall_thickness+extrusion_height*1,-belt_area_body_depth/2+base_side_wall_thickness/2,0]) {
           cube([base_side_wall_thickness*2,base_side_wall_thickness,leadscrew_retainer_height],center=true);
-          /*
-          rotate([90,0,0]) {
-            rotate([0,0,rotation]) {
-              hole(base_side_wall_thickness*2,base_side_wall_thickness,resolution);
-            }
-          }
-          */
         }
         translate([base_width/2-bearing_retainer_diam/4,bearing_pos_y,0]) {
           cube([bearing_retainer_diam/2,bearing_retainer_diam,leadscrew_retainer_height],center=true);
@@ -221,8 +213,7 @@ module x_end_base() {
 
     // bearing zip ties
     for (side=[top,bottom]) {
-      translate([bearing_pos_x,bearing_pos_y,(x_rod_spacing/2-bearing_inner_diam/2-zip_tie_hole_width/2)*side]) {
-      //translate([bearing_pos_x,bearing_pos_y,(belt_opening_height/2-belt_opening_depth)*side]) {
+      translate([bearing_pos_x,bearing_pos_y,(belt_opening_height/2-belt_opening_depth/2-zip_tie_hole_width*.75)*side]) {
         zip_tie_hole(bearing_retainer_diam-zip_tie_hole_thickness*.8);
       }
     }
