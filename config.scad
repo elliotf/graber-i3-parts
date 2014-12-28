@@ -53,3 +53,9 @@ belt_pulley_circ   = belt_pitch*20; // 20T GT2
 belt_pulley_diam   = belt_pulley_circ / approximate_pi;
 
 x_rod_spacing      = 45;
+
+z_leadscrew_smooth_rod_spacing = 17;
+
+x_end_base_depth  = bearing_inner_diam + min_material_thickness*2;
+x_end_base_width  = motor_side/2 + z_leadscrew_smooth_rod_spacing + bearing_outer_diam/2;
+x_end_base_height = x_rod_spacing + x_end_base_depth;

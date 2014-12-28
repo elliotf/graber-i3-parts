@@ -1,11 +1,11 @@
 include <config.scad>;
 use <util.scad>;
 
-smooth_threaded_spacing = 17;
+z_leadscrew_smooth_rod_spacing = 17;
 
-base_depth  = bearing_inner_diam + min_material_thickness*2;
-base_width  = motor_side/2 + smooth_threaded_spacing + bearing_outer_diam/2;
-base_height = x_rod_spacing + base_depth;
+base_depth  = x_end_base_depth;
+base_width  = x_end_base_width;
+base_height = x_end_base_height;
 
 leadscrew_diam          = 5;
 leadscrew_nut_diam      = 8.2;
@@ -18,7 +18,7 @@ bearing_pos_y           = bearing_dist_from_x_rod*front;
 
 leadscrew_retainer_diam   = leadscrew_nut_diam+6;
 leadscrew_retainer_height = leadscrew_nut_thickness*4;
-leadscrew_retainer_pos_x  = bearing_pos_x+(left*smooth_threaded_spacing);
+leadscrew_retainer_pos_x  = bearing_pos_x+(left*z_leadscrew_smooth_rod_spacing);
 leadscrew_retainer_pos_y  = bearing_pos_y;
 leadscrew_retainer_pos_z  = base_height/2-leadscrew_retainer_height/2;
 leadscrew_retainer_pos_z  = x_rod_spacing/2-bearing_inner_diam/2-leadscrew_retainer_height/2;
